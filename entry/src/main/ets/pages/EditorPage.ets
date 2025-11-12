@@ -25,10 +25,10 @@ interface WatermarkParams {
 }
 
 // FrameNode 默认没有 width/height 属性，这里为 Canvas 场景扩充
-interface CanvasElement extends FrameNode {
+type CanvasElement = FrameNode & {
   width: number;
   height: number;
-}
+};
 
 // ArkUI 环境下并无内置 Image 对象；为避免 any，声明最小化接口即可
 declare class Image {
@@ -76,7 +76,7 @@ struct EditorPage {
   private startY: number = 0
   private currentOperation: DrawingOperation | null = null
   private settings: RenderingContextSettings = new RenderingContextSettings(true)
-  private loadedImage: ImageBitmap | null = null
+  private loadedPixelMap: image.PixelMap | null = null
   private watermarkDialogController: CustomDialogController | null = null
 
   aboutToAppear() {
@@ -100,7 +100,7 @@ struct EditorPage {
       this.canvasWidth = info.size.width
       this.canvasHeight = info.size.height
       // 保存 PixelMap 以备 drawImage
-      this.loadedImage = pixelMap
+      this.loadedPixelMap = pixelMap
       this.redrawCanvas()
     } catch (err) {
       console.error('加载图片失败:', JSON.stringify(err))
@@ -331,9 +331,9 @@ struct EditorPage {
     this.canvasContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
 
     // 绘制图片
-    if (this.loadedImage) {
-      // ArkTS Canvas 可直接 drawPixelMap
-      this.canvasContext.drawPixelMap(this.loadedImage, 0, 0, this.canvasWidth, this.canvasHeight)
+    if (this.loadedPixelMap) {
+      // Canvas 目前支持 drawImage(PixelMap, x, y, w?, h?)
+      this.canvasContext.drawImage(this.loadedPixelMap, 0, 0, this.canvasWidth, this.canvasHeight)
     }
 
     // 应用图片调整（亮度、对比度、旋转）
@@ -549,8 +549,8 @@ struct EditorPage {
 
     try {
       // 获取canvas的ImageData
-      const canvas = this.canvasContext.canvas
-      const imageData = this.canvasContext.getImageData(0, 0, canvas.width, canvas.height)
+      const canvasNode = this.canvasContext.canvas as CanvasElement
+      const imageData = this.canvasContext.getImageData(0, 0, canvasNode.width, canvasNode.height)
 
       // 实际应用中需要将ImageData转换为PixelMap并保存
       // 这里简化处理
