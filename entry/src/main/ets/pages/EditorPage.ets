@@ -15,6 +15,31 @@ import { promptAction } from '@kit.ArkUI'
 import { common } from '@kit.AbilityKit'
 import { image } from '@kit.ImageKit'
 
+// ------------------ 类型定义与声明 ------------------
+interface WatermarkParams {
+  text: string;
+  fontSize: number;
+  fontColor: string;
+  opacity: number;
+  position: string;
+}
+
+// FrameNode 默认没有 width/height 属性，这里为 Canvas 场景扩充
+interface CanvasElement extends FrameNode {
+  width: number;
+  height: number;
+}
+
+// ArkUI 环境下并无内置 Image 对象；为避免 any，声明最小化接口即可
+declare class Image {
+  src: string;
+  width: number;
+  height: number;
+  onload: () => void;
+  onerror: () => void;
+}
+// ---------------------------------------------------
+
 // 图片编辑器页面
 @Entry
 @Component
@@ -23,7 +48,7 @@ struct EditorPage {
   @State selectedTool: ToolType = ToolType.NONE
   @State currentColor: string = '#000000'
   @State strokeWidth: number = 3
-  @State opacity: number = 1.0
+  @State brushOpacity: number = 1.0
   @State showColorPicker: boolean = false
   @State showBrushSettings: boolean = false
   @State showAdjustPanel: boolean = false
@@ -32,7 +57,7 @@ struct EditorPage {
   @State imageAdjustment: ImageAdjustment = new ImageAdjustment()
   @State canUndo: boolean = false
   @State canRedo: boolean = false
-  @State scale: number = 1.0
+  @State scaleFactor: number = 1.0
   @State offsetX: number = 0
   @State offsetY: number = 0
   @State cropX: number = 50
@@ -68,21 +93,15 @@ struct EditorPage {
     if (!this.imageUri) return
 
     try {
-      const img = new Image()
-      img.src = this.imageUri
-      img.onload = () => {
-        this.imageLoaded = true
-        // 调整canvas尺寸适应图片
-        this.canvasWidth = img.width
-        this.canvasHeight = img.height
-        this.redrawCanvas()
-      }
-      img.onerror = () => {
-        promptAction.showToast({
-          message: '图片加载失败',
-          duration: 2000
-        })
-      }
+      const src = image.createImageSource(this.imageUri)
+      const pixelMap = await src.createPixelMap()
+      const info = await src.getImageInfo()
+      this.imageLoaded = true
+      this.canvasWidth = info.size.width
+      this.canvasHeight = info.size.height
+      // 保存 PixelMap 以备 drawImage
+      this.loadedImage = pixelMap
+      this.redrawCanvas()
     } catch (err) {
       console.error('加载图片失败:', JSON.stringify(err))
     }
@@ -117,13 +136,7 @@ struct EditorPage {
   showWatermarkDialog() {
     this.watermarkDialogController = new CustomDialogController({
       builder: WatermarkDialog({
-        onConfirm: (params: {
-          text: string,
-          fontSize: number,
-          fontColor: string,
-          opacity: number,
-          position: string
-        }) => {
+        onConfirm: (params: WatermarkParams) => {
           this.addWatermark(params)
         }
       }),
@@ -135,13 +148,7 @@ struct EditorPage {
   }
 
   // 添加水印
-  addWatermark(params: {
-    text: string,
-    fontSize: number,
-    fontColor: string,
-    opacity: number,
-    position: string
-  }) {
+  addWatermark(params: WatermarkParams) {
     if (!this.canvasContext) return
 
     let x = 0
@@ -219,10 +226,9 @@ struct EditorPage {
     )
 
     // 清空并调整canvas大小
-    this.canvasWidth = this.cropWidth
-    this.canvasHeight = this.cropHeight
-    this.canvasContext.canvas.width = this.cropWidth
-    this.canvasContext.canvas.height = this.cropHeight
+    const canvasNode = this.canvasContext.canvas as CanvasElement
+    canvasNode.width = this.cropWidth
+    canvasNode.height = this.cropHeight
 
     // 绘制裁剪后的图片
     this.canvasContext.putImageData(imageData, 0, 0)
@@ -276,7 +282,7 @@ struct EditorPage {
     this.currentOperation = new DrawingOperation(opType)
     this.currentOperation.color = this.currentColor
     this.currentOperation.strokeWidth = this.strokeWidth
-    this.currentOperation.opacity = this.opacity
+    this.currentOperation.opacity = this.brushOpacity
     this.currentOperation.points.push({ x: this.startX, y: this.startY })
   }
 
@@ -325,10 +331,9 @@ struct EditorPage {
     this.canvasContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
 
     // 绘制图片
-    if (this.imageUri && this.imageLoaded) {
-      const img = new Image()
-      img.src = this.imageUri
-      this.canvasContext.drawImage(img, 0, 0, this.canvasWidth, this.canvasHeight)
+    if (this.loadedImage) {
+      // ArkTS Canvas 可直接 drawPixelMap
+      this.canvasContext.drawPixelMap(this.loadedImage, 0, 0, this.canvasWidth, this.canvasHeight)
     }
 
     // 应用图片调整（亮度、对比度、旋转）
@@ -680,14 +685,14 @@ struct EditorPage {
             if (this.showBrushSettings) {
               BrushSettings({
                 strokeWidth: $strokeWidth,
-                opacity: $opacity
+                brushOpacity: $brushOpacity
               })
             }
 
             if (this.showAdjustPanel) {
               ImageAdjustPanel({
-                brightness: $imageAdjustment.brightness,
-                contrast: $imageAdjustment.contrast,
+                imageBrightness: $imageAdjustment.brightness,
+                imageContrast: $imageAdjustment.contrast,
                 onRotate: () => {
                   this.rotateImage()
                 }

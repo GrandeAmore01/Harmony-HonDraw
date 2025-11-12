@@ -12,6 +12,14 @@ import { WatermarkManager } from '../utils/WatermarkManager'
 import { promptAction } from '@kit.ArkUI'
 import { common } from '@kit.AbilityKit'
 
+interface WatermarkParams {
+  text: string;
+  fontSize: number;
+  fontColor: string;
+  opacity: number;
+  position: string;
+}
+
 // 协同编辑器页面
 @Entry
 @Component
@@ -23,7 +31,7 @@ struct CollaborativeEditorPage {
   @State selectedTool: ToolType = ToolType.NONE
   @State currentColor: string = '#000000'
   @State strokeWidth: number = 3
-  @State opacity: number = 1.0
+  @State brushOpacity: number = 1.0
   @State showColorPicker: boolean = false
   @State showBrushSettings: boolean = false
   @State operations: DrawingOperation[] = []
@@ -156,13 +164,7 @@ struct CollaborativeEditorPage {
   showWatermarkDialog() {
     this.watermarkDialogController = new CustomDialogController({
       builder: WatermarkDialog({
-        onConfirm: (params: {
-          text: string,
-          fontSize: number,
-          fontColor: string,
-          opacity: number,
-          position: string
-        }) => {
+        onConfirm: (params: WatermarkParams) => {
           this.addWatermark(params)
         }
       }),
@@ -174,13 +176,7 @@ struct CollaborativeEditorPage {
   }
 
   // 添加水印
-  addWatermark(params: {
-    text: string,
-    fontSize: number,
-    fontColor: string,
-    opacity: number,
-    position: string
-  }) {
+  addWatermark(params: WatermarkParams) {
     if (!this.canvasContext) return
 
     let x = 0
@@ -278,7 +274,7 @@ struct CollaborativeEditorPage {
     this.currentOperation = new DrawingOperation(opType)
     this.currentOperation.color = this.currentColor
     this.currentOperation.strokeWidth = this.strokeWidth
-    this.currentOperation.opacity = this.opacity
+    this.currentOperation.opacity = this.brushOpacity
     this.currentOperation.userName = this.userName
     this.currentOperation.userColor = this.myColor
     this.currentOperation.points.push({ x: this.startX, y: this.startY })
@@ -580,7 +576,7 @@ struct CollaborativeEditorPage {
             if (this.showBrushSettings) {
               BrushSettings({
                 strokeWidth: $strokeWidth,
-                opacity: $opacity
+                brushOpacity: $brushOpacity
               })
             }
           }

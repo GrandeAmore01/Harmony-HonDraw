@@ -21,8 +21,10 @@ export interface CollaborationMessage {
   userName: string
   userColor: string
   timestamp: number
-  data?: any
+  data?: CollaborationPayload
 }
+
+type CollaborationPayload = DrawingOperation | { x: number; y: number } | DrawingOperation[];
 
 // 协同编辑管理器
 export class CollaborationManager {

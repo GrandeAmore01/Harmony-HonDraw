@@ -25,7 +25,7 @@ export class DrawingOperation {
   type: OperationType = OperationType.DRAW_LINE
   color: string = '#000000'
   strokeWidth: number = 2
-  opacityValue: number = 1.0  // 改名避免与系统属性冲突
+  opacity: number = 1.0
   points: Array<Point> = []
   text?: string
   timestamp: number = Date.now()
