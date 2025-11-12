@@ -24,10 +24,10 @@ interface WatermarkParams {
   position: string;
 }
 
-// FrameNode 默认没有 width/height 属性，这里为 Canvas 场景扩充
-class CanvasElement extends FrameNode {
-  width: number = 0;
-  height: number = 0;
+// CanvasElement 类型定义
+interface CanvasElement {
+  width: number;
+  height: number;
 }
 
 // ArkUI 环境下并无内置 Image 对象；为避免 any，声明最小化接口即可
@@ -38,6 +38,7 @@ declare class Image {
   onload: () => void;
   onerror: () => void;
 }
+
 // ---------------------------------------------------
 
 // 图片编辑器页面
@@ -68,7 +69,6 @@ struct EditorPage {
   @State imageLoaded: boolean = false
   @State canvasWidth: number = 800
   @State canvasHeight: number = 600
-
   private historyManager: HistoryManager = new HistoryManager()
   private canvasContext: CanvasRenderingContext2D | null = null
   private isDrawing: boolean = false
@@ -90,7 +90,9 @@ struct EditorPage {
 
   // 加载图片
   async loadImage() {
-    if (!this.imageUri) return
+    if (!this.imageUri) {
+      return
+    }
 
     try {
       const src = image.createImageSource(this.imageUri)
@@ -149,7 +151,9 @@ struct EditorPage {
 
   // 添加水印
   addWatermark(params: WatermarkParams) {
-    if (!this.canvasContext) return
+    if (!this.canvasContext) {
+      return
+    }
 
     let x = 0
     let y = 0
@@ -216,7 +220,9 @@ struct EditorPage {
   // 确认裁剪
   confirmCrop() {
     // 创建新的canvas保存裁剪结果
-    if (!this.canvasContext) return
+    if (!this.canvasContext) {
+      return
+    }
 
     const imageData = this.canvasContext.getImageData(
       this.cropX,
@@ -224,11 +230,9 @@ struct EditorPage {
       this.cropWidth,
       this.cropHeight
     )
-
     // 清空并调整canvas大小
-    const canvasNode = this.canvasContext.canvas as CanvasElement
-    canvasNode.width = this.cropWidth
-    canvasNode.height = this.cropHeight
+    this.canvasWidth = this.cropWidth
+    this.canvasHeight = this.cropHeight
 
     // 绘制裁剪后的图片
     this.canvasContext.putImageData(imageData, 0, 0)
@@ -250,7 +254,9 @@ struct EditorPage {
 
   // 处理触摸开始
   handleTouchStart(event: TouchEvent) {
-    if (this.selectedTool === ToolType.NONE) return
+    if (this.selectedTool === ToolType.NONE) {
+      return
+    }
 
     this.isDrawing = true
     this.startX = event.touches[0].x
@@ -288,7 +294,9 @@ struct EditorPage {
 
   // 处理触摸移动
   handleTouchMove(event: TouchEvent) {
-    if (!this.isDrawing || !this.currentOperation) return
+    if (!this.isDrawing || !this.currentOperation) {
+      return
+    }
 
     const x = event.touches[0].x
     const y = event.touches[0].y
@@ -310,7 +318,9 @@ struct EditorPage {
 
   // 处理触摸结束
   handleTouchEnd(event: TouchEvent) {
-    if (!this.isDrawing || !this.currentOperation) return
+    if (!this.isDrawing || !this.currentOperation) {
+      return
+    }
 
     this.isDrawing = false
 
@@ -325,7 +335,9 @@ struct EditorPage {
 
   // 重绘画布
   redrawCanvas() {
-    if (!this.canvasContext) return
+    if (!this.canvasContext) {
+      return
+    }
 
     // 清空画布
     this.canvasContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
@@ -359,7 +371,9 @@ struct EditorPage {
 
   // 应用图片调整
   applyImageAdjustments() {
-    if (!this.canvasContext) return
+    if (!this.canvasContext) {
+      return
+    }
 
     const imageData = this.canvasContext.getImageData(0, 0, this.canvasWidth, this.canvasHeight)
     const data = imageData.data
@@ -389,7 +403,9 @@ struct EditorPage {
 
   // 绘制裁剪框
   drawCropOverlay() {
-    if (!this.canvasContext) return
+    if (!this.canvasContext) {
+      return
+    }
 
     this.canvasContext.save()
 
@@ -431,7 +447,9 @@ struct EditorPage {
 
   // 绘制单个操作
   drawOperation(op: DrawingOperation) {
-    if (!this.canvasContext || op.points.length === 0) return
+    if (!this.canvasContext || op.points.length === 0) {
+      return
+    }
 
     this.canvasContext.globalAlpha = op.opacity
     this.canvasContext.strokeStyle = op.color
@@ -546,11 +564,9 @@ struct EditorPage {
       })
       return
     }
-
     try {
       // 获取canvas的ImageData
-      const canvasNode = this.canvasContext.canvas as CanvasElement
-      const imageData = this.canvasContext.getImageData(0, 0, canvasNode.width, canvasNode.height)
+      const imageData = this.canvasContext.getImageData(0, 0, this.canvasWidth, this.canvasHeight)
 
       // 实际应用中需要将ImageData转换为PixelMap并保存
       // 这里简化处理
