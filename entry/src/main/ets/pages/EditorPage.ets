@@ -25,10 +25,10 @@ interface WatermarkParams {
 }
 
 // FrameNode 默认没有 width/height 属性，这里为 Canvas 场景扩充
-type CanvasElement = FrameNode & {
-  width: number;
-  height: number;
-};
+class CanvasElement extends FrameNode {
+  width: number = 0;
+  height: number = 0;
+}
 
 // ArkUI 环境下并无内置 Image 对象；为避免 any，声明最小化接口即可
 declare class Image {

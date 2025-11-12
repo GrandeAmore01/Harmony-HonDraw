@@ -24,7 +24,12 @@ export interface CollaborationMessage {
   data?: CollaborationPayload
 }
 
-type CollaborationPayload = DrawingOperation | { x: number; y: number } | DrawingOperation[];
+interface CursorMoveData {
+  x: number;
+  y: number;
+}
+
+type CollaborationPayload = DrawingOperation | CursorMoveData | DrawingOperation[];
 
 // 协同编辑管理器
 export class CollaborationManager {
@@ -197,7 +202,7 @@ export class CollaborationManager {
       userName: this.userName,
       userColor: this.userColor,
       timestamp: Date.now(),
-      data: { x, y }
+      data: { x, y } as CursorMoveData
     })
   }
 
@@ -267,7 +272,8 @@ export class CollaborationManager {
       case MessageType.CURSOR_MOVE:
         // 光标移动
         if (this.onCursorMoved && message.data) {
-          this.onCursorMoved(message.userId, message.data.x, message.data.y)
+          const pos = message.data as CursorMoveData
+          this.onCursorMoved(message.userId, pos.x, pos.y)
         }
         break
 
