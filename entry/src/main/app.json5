@@ -1,0 +1,12 @@
+{
+  "app": {
+    "bundleName": "com.example.honghui1",  // 替换为你的应用包名（建议保持唯一性，如com.你的名字.项目名）
+    "vendor": "example",                    // 替换为你的开发者标识（如公司名或个人名）
+    "versionCode": 1,
+    "versionName": "1.0.0",
+    "apiVersion": {
+      "targetSdkVersion": 10,  // 项目使用的ArkTS/ArkUI API版本（根据实际情况修改，如9、10、11）
+      "compatibleSdkVersion": 9  // 最低兼容版本（通常≤targetSdkVersion）
+    }
+  }
+}

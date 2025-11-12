@@ -3,6 +3,8 @@ import { picker } from '@kit.CoreFileKit'
 import { image } from '@kit.ImageKit'
 import { common } from '@kit.AbilityKit'
 
+export interface ImageSize { width: number; height: number }
+
 // 图片管理器 - 处理图片的打开、保存、加载
 export class ImageManager {
   // 打开图片
@@ -91,7 +93,6 @@ export class ImageManager {
   }
 
   // 获取图片尺寸
-  export interface ImageSize { width: number; height: number }
 
   static async getImageSize(uri: string): Promise<ImageSize | null> {
     try {
