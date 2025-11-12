@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "strict": false,
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "entry/src/main/ets/**/*.ets",
+    "entry/src/main/ets/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}
