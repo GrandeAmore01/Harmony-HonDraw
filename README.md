@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 鸿绘 - HarmonyOS 图片编辑器
 
 <div align="center">
@@ -323,8 +322,8 @@ interface CollaborationMessage {
 
 ---
 
-**鸿绘** - 让图片编辑更简单，让协作创作更高效！
-=======
+# **鸿绘** - 让图片编辑更简单，让协作创作更高效！
+
 # Harmony-HonDraw
+
 HongHui is a streamlined image editor supporting basic edits (opening/saving, zooming, cropping, etc.), shape/text watermark addition, customizable brushes, undo/redo, real-time collaboration for 2+ users (color-coded cursors, drawing previews, conflict resolution) and sharing to WeChat, Weibo, email, etc.
->>>>>>> origin/main
