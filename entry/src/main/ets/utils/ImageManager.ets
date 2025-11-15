@@ -83,7 +83,14 @@ export class ImageManager {
   // 加载图片到PixelMap
   static async loadImagePixelMap(uri: string): Promise<image.PixelMap | null> {
     try {
-      const imageSource = image.createImageSource(uri)
+      // 一些设备相册返回的 file:// 路径缺少一个斜杠，API20 下会导致 createImageSource 失败
+      let fixedUri: string = uri
+      if (fixedUri.startsWith('file://') && !fixedUri.startsWith('file:///')) {
+        fixedUri = 'file:///' + fixedUri.substring('file://'.length)
+        console.warn(`ImageManager.loadImagePixelMap - 修正 URI: ${fixedUri}`)
+      }
+
+      const imageSource = image.createImageSource(fixedUri)
       const pixelMap = await imageSource.createPixelMap()
       return pixelMap
     } catch (err) {
@@ -96,7 +103,12 @@ export class ImageManager {
 
   static async getImageSize(uri: string): Promise<ImageSize | null> {
     try {
-      const imageSource = image.createImageSource(uri)
+      let fixedUri: string = uri
+      if (fixedUri.startsWith('file://') && !fixedUri.startsWith('file:///')) {
+        fixedUri = 'file:///' + fixedUri.substring('file://'.length)
+      }
+
+      const imageSource = image.createImageSource(fixedUri)
       const imageInfo = await imageSource.getImageInfo()
       const size: ImageSize = {
         width: imageInfo.size.width,

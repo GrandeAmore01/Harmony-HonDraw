@@ -84,7 +84,7 @@ struct EditorPage {
 
   aboutToAppear() {
     // 获取路由参数
-    const params = router.getParams() as Record<string, Object>
+    const params = router.getParams() as Record<string, string>
     if (params && params['imageUri']) {
       this.imageUri = params['imageUri'] as string
       this.loadImage()
@@ -93,6 +93,7 @@ struct EditorPage {
 
   // 加载图片
   async loadImage() {
+    // 0. 读取媒体权限：API 20 大多已在清单声明后自动授予，如需动态申请可在此补充
     if (!this.imageUri) {
       console.error('[EditorPage] loadImage - imageUri 为空，终止加载');
       return
@@ -100,7 +101,20 @@ struct EditorPage {
 
     try {
       console.log('[EditorPage] 尝试创建 ImageSource，URI:', this.imageUri);
-      const src = image.createImageSource(this.imageUri)
+      // 一些设备/相册返回的 file:// URI 可能仅包含两个斜杠，导致 ImageKit 无法识别，需补全为 file:/// 形式
+      let fixedUri: string = this.imageUri
+      if (fixedUri.startsWith('file://') && !fixedUri.startsWith('file:///')) {
+        fixedUri = 'file:///' + fixedUri.substring('file://'.length)
+        console.warn(`[EditorPage] 检测到 file:// URI 缺少根路径斜杠，已修正为: ${fixedUri}`)
+      }
+
+      // 部分系统返回路径缺少 /storage 前缀
+      if (fixedUri.startsWith('file:///media/')) {
+        fixedUri = fixedUri.replace('file:///media/', 'file:///storage/media/')
+        console.warn(`[EditorPage] 补全存储前缀，修正为: ${fixedUri}`)
+      }
+
+      const src = image.createImageSource(fixedUri)
       if (!src) {
         console.error('[EditorPage] 1.1 ImageSource 创建失败（返回 null），无法继续');
         return;
