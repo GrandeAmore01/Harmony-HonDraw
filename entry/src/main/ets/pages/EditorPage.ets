@@ -56,6 +56,8 @@ struct EditorPage {
   @State showCropPanel: boolean = false
   @State operations: DrawingOperation[] = []
   @State imageAdjustment: ImageAdjustment = new ImageAdjustment()
+  @State imageBrightness: number = 0;  // 显式初始化
+  @State imageContrast: number = 0;    // 显式初始化
   @State canUndo: boolean = false
   @State canRedo: boolean = false
   @State scaleFactor: number = 1.0
@@ -78,6 +80,7 @@ struct EditorPage {
   private settings: RenderingContextSettings = new RenderingContextSettings(true)
   private loadedPixelMap: image.PixelMap | null = null
   private watermarkDialogController: CustomDialogController | null = null
+  //@State imageBrightness: number = 0.5; // 需要显式初始化
 
   aboutToAppear() {
     // 获取路由参数
@@ -349,7 +352,7 @@ struct EditorPage {
     }
 
     // 应用图片调整（亮度、对比度、旋转）
-    if (this.imageAdjustment.brightness !== 0 || this.imageAdjustment.contrast !== 0) {
+    if (this.imageAdjustment.imageBrightness !== 0 || this.imageAdjustment.imageContrast !== 0) {
       this.applyImageAdjustments()
     }
 
@@ -378,8 +381,8 @@ struct EditorPage {
     const imageData = this.canvasContext.getImageData(0, 0, this.canvasWidth, this.canvasHeight)
     const data = imageData.data
 
-    const brightness = this.imageAdjustment.brightness * 2.55 // 转换为0-255范围
-    const contrast = (this.imageAdjustment.contrast + 100) / 100 // 转换为乘数
+    const brightness = this.imageAdjustment.imageBrightness * 2.55 // 转换为0-255范围
+    const contrast = (this.imageAdjustment.imageContrast + 100) / 100 // 转换为乘数
 
     for (let i = 0; i < data.length; i += 4) {
       // 应用对比度
@@ -708,8 +711,10 @@ struct EditorPage {
 
             if (this.showAdjustPanel) {
               ImageAdjustPanel({
-                imageBrightness: $imageAdjustment.brightness,
-                imageContrast: $imageAdjustment.contrast,
+                // imageBrightness: this.imageAdjustment.imageBrightness,
+                // imageContrast: this.imageAdjustment.imageContrast,
+                imageBrightness: $imageBrightness,  // 注意：双向绑定需用$语法传递
+                imageContrast: $imageContrast,
                 onRotate: () => {
                   this.rotateImage()
                 }

@@ -40,9 +40,10 @@ export class DrawingOperation {
 }
 
 // 图片调整参数
+@Observed
 export class ImageAdjustment {
-  brightness: number = 0 // -100 到 100
-  contrast: number = 0 // -100 到 100
+  imageBrightness: number = 0 // -100 到 100
+  imageContrast: number = 0 // -100 到 100
   rotation: number = 0 // 0, 90, 180, 270
   scale: number = 1.0
   offsetX: number = 0

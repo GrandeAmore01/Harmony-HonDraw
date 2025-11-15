@@ -1,8 +1,12 @@
 // 图片调整面板
+//import { Component, ObjectLink } from '@harmonyos/arkui';
+//import { ImageAdjustment } from '../model/DrawingOperation';
 @Component
+
 export struct ImageAdjustPanel {
   @Link imageBrightness: number  // 改名避免与系统属性冲突
   @Link imageContrast: number    // 改名避免与系统属性冲突
+
   onRotate?: () => void
 
   build() {
