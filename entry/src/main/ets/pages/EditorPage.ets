@@ -3,7 +3,7 @@ import { ToolType } from '../model/ToolbarItem'
 import { DrawingOperation, OperationType, ImageAdjustment } from '../model/DrawingOperation'
 import { HistoryManager } from '../utils/HistoryManager'
 import { EditorToolbar } from '../components/EditorToolbar'
-import { ColorPicker } from '../components/ColorPicker'
+import { CustomColorPicker } from '../components/ColorPicker'
 import { BrushSettings } from '../components/BrushSettings'
 import { ImageAdjustPanel } from '../components/ImageAdjustPanel'
 import { CropPanel } from '../components/CropPanel'
@@ -693,9 +693,10 @@ struct EditorPage {
 
         // 设置面板
         if (this.showColorPicker || this.showBrushSettings || this.showAdjustPanel) {
+          //const color = this.currentColor;
           Column({ space: 12 }) {
             if (this.showColorPicker) {
-              ColorPicker({ selectedColor: $currentColor })
+              CustomColorPicker({ selectedColor: this.currentColor })
             }
 
             if (this.showBrushSettings) {
