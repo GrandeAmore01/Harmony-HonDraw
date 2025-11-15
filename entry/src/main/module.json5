@@ -10,6 +10,17 @@
     "deliveryWithInstall": true,
     "installationFree": false,
     "pages": "$profile:main_pages",
+    // 新增：权限配置 读取媒体文件的核心权限
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.READ_MEDIA", // 读取图片/视频的核心权限
+        "reason": "$string:read_media_reason", // 权限申请理由（用户可见）
+        "usedScene": {
+          "abilities": ["EntryAbility"], // 关联的Ability（主Ability）
+          "when": "inuse" // 权限使用时机：仅在应用使用时
+        }
+      }
+    ],
     "abilities": [
       {
         "name": "EntryAbility",

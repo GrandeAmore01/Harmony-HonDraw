@@ -94,19 +94,34 @@ struct EditorPage {
   // 加载图片
   async loadImage() {
     if (!this.imageUri) {
+      console.error('[EditorPage] loadImage - imageUri 为空，终止加载');
       return
     }
 
     try {
+      console.log('[EditorPage] 尝试创建 ImageSource，URI:', this.imageUri);
       const src = image.createImageSource(this.imageUri)
+      if (!src) {
+        console.error('[EditorPage] 1.1 ImageSource 创建失败（返回 null），无法继续');
+        return;
+      }
+      console.log('[EditorPage] 2. ImageSource 创建成功，准备创建 PixelMap');
       const pixelMap = await src.createPixelMap()
+      // 关键：检查 PixelMap 是否有效
+      if (!pixelMap) {
+        console.error('[EditorPage] 3.1 PixelMap 创建失败（返回 null），无法继续');
+        return;
+      }
+      console.log('[EditorPage] 3. PixelMap 创建成功');
       const info = await src.getImageInfo()
+      console.log('[EditorPage] 5. 图片信息获取成功：', info);
       this.imageLoaded = true
       this.canvasWidth = info.size.width
       this.canvasHeight = info.size.height
       // 保存 PixelMap 以备 drawImage
       this.loadedPixelMap = pixelMap
       this.redrawCanvas()
+      console.log('[EditorPage] 6. 图片加载完成，触发 redrawCanvas');
     } catch (err) {
       console.error('加载图片失败:', JSON.stringify(err))
     }
@@ -338,17 +353,22 @@ struct EditorPage {
 
   // 重绘画布
   redrawCanvas() {
+    console.log('[EditorPage] redrawCanvas - 开始重绘画布');
     if (!this.canvasContext) {
+      console.error('[EditorPage] redrawCanvas - canvasContext 为 null，无法绘制');
       return
     }
 
     // 清空画布
     this.canvasContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
+    console.log(`[EditorPage] 清空画布：宽=${this.canvasWidth}, 高=${this.canvasHeight}`);
 
     // 绘制图片
     if (this.loadedPixelMap) {
+      console.log('[EditorPage] 开始绘制图片到画布');
       // Canvas 目前支持 drawImage(PixelMap, x, y, w?, h?)
       this.canvasContext.drawImage(this.loadedPixelMap, 0, 0, this.canvasWidth, this.canvasHeight)
+      console.log('[EditorPage] 图片绘制完成');
     }
 
     // 应用图片调整（亮度、对比度、旋转）

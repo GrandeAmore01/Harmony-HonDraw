@@ -56,7 +56,9 @@ struct CollaborativeEditorPage {
   aboutToAppear() {
     // 获取路由参数
     const params = router.getParams() as Record<string, Object>
+    console.log('[EditorPage] aboutToAppear - 开始接收路由参数');
     if (params) {
+      console.log('[EditorPage] 接收到的所有参数:', JSON.stringify(params)); // 打印所有参数
       this.imageUri = (params['imageUri'] as string) || ''
       this.sessionCode = (params['sessionCode'] as string) || ''
       this.userName = (params['userName'] as string) || ''
@@ -548,8 +550,10 @@ struct CollaborativeEditorPage {
           .height('100%')
           .backgroundColor('#FFFFFF')
           .onReady(() => {
+            console.log('[EditorPage] Canvas onReady - 开始初始化 canvasContext');
             this.canvasContext = new CanvasRenderingContext2D(this.settings)
             this.redrawCanvas()
+            console.log('[EditorPage] redrawCanvas - 开始重绘画布');
           })
           .onTouch((event: TouchEvent) => {
             if (event.type === TouchType.Down) {

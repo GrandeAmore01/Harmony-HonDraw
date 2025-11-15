@@ -11,6 +11,11 @@
     {
       "name": "EntryAbility_label",
       "value": "label"
+    },
+
+    {
+      "name": "read_media_reason",
+      "value": "需要访问相册图片进行编辑"
     }
   ]
 }
