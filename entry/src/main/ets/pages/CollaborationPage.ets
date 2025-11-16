@@ -1,6 +1,7 @@
 import { router } from '@kit.ArkUI'
 import { picker } from '@kit.CoreFileKit'
 import { promptAction } from '@kit.ArkUI'
+import { copyPhotoToCache } from '../utils/UriResolver'
 
 // 协同编辑页面 - 创建或加入协同编辑会话
 @Entry
@@ -39,7 +40,12 @@ struct CollaborationPage {
       const result = await photoPicker.select(photoSelectOptions)
 
       if (result && result.photoUris && result.photoUris.length > 0) {
-        const imageUri = result.photoUris[0]
+        const mediaUri = result.photoUris[0]
+        const imageUri = await copyPhotoToCache(mediaUri)
+        if (!imageUri) {
+          console.error('复制图片失败')
+          return
+        }
         const sessionCode = this.generateSessionCode()
 
         // 跳转到协同编辑器

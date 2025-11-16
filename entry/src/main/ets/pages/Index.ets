@@ -1,5 +1,6 @@
 import { router } from '@kit.ArkUI'
 import { picker } from '@kit.CoreFileKit'
+import { copyPhotoToCache } from '../utils/UriResolver'
 
 // 主入口页面 - 鸿绘图片编辑器
 @Entry
@@ -19,12 +20,16 @@ struct Index {
       const result = await photoPicker.select(photoSelectOptions)
 
       if (result && result.photoUris && result.photoUris.length > 0) {
-        const imageUri = result.photoUris[0]
-        // 跳转到编辑器页面
+        const mediaUri = result.photoUris[0]
+        const realPath = await copyPhotoToCache(mediaUri)
+        if (!realPath) {
+          console.error('复制图片失败')
+          return
+        }
         router.pushUrl({
           url: 'pages/EditorPage',
           params: {
-            imageUri: imageUri,
+            imageUri: realPath,
             isCollaborative: false
           }
         })
